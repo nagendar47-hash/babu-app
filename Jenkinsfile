@@ -66,9 +66,12 @@ pipeline {
                         sed -i 's|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:.*|image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
 
                         git add k8s/deployment.yaml
-                        git diff --staged --quiet || git commit -m "ci: update image tag to ${IMAGE_TAG} [skip ci]"
-                        git commit -m "ci: update image tag to ${IMAGE_TAG} [skip ci]"
-                        git push https://${GITHUB_USERNAME}:${GIT_TOKEN}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO}.git HEAD:main
+                        if git diff --staged --quiet; then
+                            echo "No changes to commit — image tag already up to date."
+                        else
+                            git commit -m "ci: update image tag to ${IMAGE_TAG} [skip ci]"
+                            git push https://${GITHUB_USERNAME}:${GIT_TOKEN}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO}.git HEAD:main
+                        fi    
                     """
                 }
             }
